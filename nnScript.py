@@ -2,6 +2,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt
+import matplotlib.pyplot as plt
 
 
 def initializeWeights(n_in,n_out):
@@ -21,13 +22,13 @@ def initializeWeights(n_in,n_out):
     return W
     
     
-    
+# Function written by Dheeraj    
 def sigmoid(z):
     
     """# Notice that z can be a scalar, a vector or a matrix
     # return the sigmoid of input z"""
     
-    return  #your code here
+    return  (1 / (1 + (np.exp(-z))))
     
     
 
@@ -62,7 +63,7 @@ def preprocess():
     
     #Pick a reasonable size for validation data
     
-    
+    print mat.keys()
     #Your code here
     train_data = np.array([])
     train_label = np.array([])
@@ -71,11 +72,65 @@ def preprocess():
     test_data = np.array([])
     test_label = np.array([])
     
+    # Dheeraj changes-1 start
+    testLabelList = []
+    testDataList = []
+    trainLabelList = []
+    trainDataList = []
+    validationLabelList = []
+    validationDataList = []   
+    
+    count =0;
+    for key, value in mat.iteritems():
+        #print key, mat[key]
+        valDataCount = 0
+        if "test" in key:
+            #count = count + len(value)
+            #np.vstack(
+            for val in value:
+                testLabelList.append(key)
+                testDataList.append(val)
+        elif "train" in key:
+            for val in value:
+                if valDataCount < 1000:
+                    validationLabelList.append(key)
+                    validationDataList.append(val)
+                    valDataCount = valDataCount + 1
+                else:
+                    trainLabelList.append(key)
+                    trainDataList.append(val)
+    #print count
+    #Dheeraj changes-1 end
+
+    train_data = np.vstack(trainDataList)
+    train_label = np.vstack(trainLabelList)
+    validation_data = np.vstack(validationDataList)
+    validation_label = np.vstack(validationLabelList)
+    test_data = np.vstack(testDataList)
+    test_label = np.vstack(testLabelList)
+    
+    #dheeraj changes-2 start
+    """print len (train_label), len (train_label.T)
+    print len(train_data), len (train_data.T)
+    print len (validation_label), len (validation_label.T)
+    print len(validation_data), len (validation_data.T)
+    print len (test_label), len (test_label.T)
+    print len(test_data), len (test_data.T)"""
+    
+    # trying to unflatten the row and plot the image of a number
+    fig = plt.figure(figsize=(12,12))
+    row = train_data[0]
+    print row
+    plt.imshow(np.reshape(row,((28,28))))
+    plt.axis('off')
+    
+    # dheeraj changes-2 end
+    
     return train_data, train_label, validation_data, validation_label, test_data, test_label
     
     
     
-
+# Function written by Dheeraj  
 def nnObjFunction(params, *args):
     """% nnObjFunction computes the value of objective function (negative log 
     %   likelihood error function with regularization) given the parameters 
@@ -127,7 +182,39 @@ def nnObjFunction(params, *args):
     #
     #
     
+    #Dheeraj: Feedforward Propogation starts here
+    # adding bias node to the training data
+    #training_data = np.append([1], training_data)
+    train_data = np.array([])
+    train_data_list = []
+
+    for x in xrange (0, len(training_data)):
+        train_data_list.append(np.append ([1], training_data[x]))
+    train_data = np.vstack(train_data_list)
+
+    aj_vector = np.array([])
+    aj_list = []
+    for j in xrange (0, n_hidden):
+        aj = 0
+        for i in xrange (0, n_input):
+            aj = aj + w1[j][i]*train_data[i]
+        aj_list.append (aj)
+    aj_vector = np.vstack(aj_list)
+
+    zj = sigmoid (aj_vector)
     
+    bl_vector = np.array([])
+    bl_list = []
+    for j in xrange (0, n_class):
+        bl = 0
+        for i in xrange (0, n_hidden):
+            bl = bl + w1[j][i]*zj[i]
+        bl_list.append (bl)
+    bl_vector = np.vstack(bl_list)
+
+    sigmal = sigmoid (bl_vector)
+    
+    #Dheeraj: Feedforward Propogation ends here
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
@@ -135,8 +222,6 @@ def nnObjFunction(params, *args):
     obj_grad = np.array([])
     
     return (obj_val,obj_grad)
-
-
 
 def nnPredict(w1,w2,data):
     
@@ -166,13 +251,16 @@ def nnPredict(w1,w2,data):
 
 """**************Neural Network Script Starts here********************************"""
 
+# Dheeraj: preprocess reads the mnist_all data file and spits out the test, train and validation numy arrays
 train_data, train_label, validation_data,validation_label, test_data, test_label = preprocess();
 
 
 #  Train Neural Network
 
 # set the number of nodes in input unit (not including bias unit)
+# dheeraj: this extracts the column size of the training data numpy array
 n_input = train_data.shape[1]; 
+#print "------", n_input, "------"
 
 # set the number of nodes in hidden unit (not including bias unit)
 n_hidden = 50;
@@ -181,10 +269,12 @@ n_hidden = 50;
 n_class = 10;				   
 
 # initialize the weights into some random matrices
+# dheeraj: this is used to generate the weight matrices of random weights for the hidden and output layers
 initial_w1 = initializeWeights(n_input, n_hidden);
 initial_w2 = initializeWeights(n_hidden, n_class);
 
 # unroll 2 weight matrices into single column vector
+#dheeraj: here we flatten the above two weight vectors and form a single row vector out of them.
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
 # set the regularization hyper-parameter
@@ -209,6 +299,7 @@ w1 = nn_params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
 w2 = nn_params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
 
+#Dheeraj: Code Testing Scripts
 #Test the computed parameters
 
 predicted_label = nnPredict(w1,w2,train_data)
