@@ -227,7 +227,7 @@ def nnObjFunction(params, *args):
     ln_one_minus_o_all_data = np.log (one_minus_o_all_data)
     #Step-2.3: ln (o_all_data) and ln (1- o_all_data) computation ends
     
-    #Step-2.4 computing j_all_data starts here
+    #Step-2.4 computing j_all_data and j_error_function starts here
     """ln_o_all_data_transpose = ln_o_all_data.transpose()
     ln_one_minus_o_all_data_transpose = ln_one_minus_o_all_data.transpose()
     temp_1 = np.dot (y_all_data, ln_o_all_data_transpose)
@@ -236,14 +236,23 @@ def nnObjFunction(params, *args):
     
     j_all_data = np.array([])
     j_all_data_list = []
+    j_error_function = 0
     for x in xrange (0, training_data_rows):
-        j_all_data_list.append (np.add (np.dot (y_all_data[x], (ln_o_all_data[x]).transpose()), np.dot (one_minus_y_all_data[x], (ln_one_minus_o_all_data[x]).transpose())))
+        j = np.add (np.dot (y_all_data[x], (ln_o_all_data[x]).transpose()), np.dot (one_minus_y_all_data[x], (ln_one_minus_o_all_data[x]).transpose()))
+        j_all_data_list.append (j)
+        j_error_function = j_error_function + j
     j_all_data = np.vstack (j_all_data_list)
-    
+    j_error_function = j_error_function / training_data_rows
     #Step-2.4 computing j_all_data ends here
     
-
+    obj_val = j_error_function
     #Dheeraj: Step-2: error function ends here
+    
+    #Dheeraj: Step-3: back propogation section starts here
+    
+    
+    
+    #Dheeraj: Step-3: back propogation section ends here
 
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
@@ -251,7 +260,6 @@ def nnObjFunction(params, *args):
     #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     
     obj_grad = np.array([])
-    
     return (obj_val,obj_grad)
 
 def nnPredict(w1,w2,data):
