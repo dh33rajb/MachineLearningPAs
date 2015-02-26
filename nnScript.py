@@ -118,11 +118,11 @@ def preprocess():
     print len(test_data), len (test_data.T)"""
     
     # trying to unflatten the row and plot the image of a number
-    fig = plt.figure(figsize=(12,12))
+    """fig = plt.figure(figsize=(12,12))
     row = train_data[0]
     print row
     plt.imshow(np.reshape(row,((28,28))))
-    plt.axis('off')
+    plt.axis('off')"""
     
     # dheeraj changes-2 end
     
@@ -176,49 +176,80 @@ def nnObjFunction(params, *args):
     obj_val = 0  
     
     #Your code here
-    #
-    #
-    #
-    #
-    #
+    #Dheeraj: Step-1: Feedforward Propogation starts here
+    training_data_rows, training_data_cols = training_data.shape
+    #training_data_cols = training_data_cols + 1
+    train_data_with_bias = np.array([])
+    train_data_with_bias_list = []
+    for x in xrange (0, training_data_rows):
+        train_data_with_bias_list.append(np.append ([1], training_data[x]))
+    train_data_with_bias = np.vstack(train_data_with_bias_list)
+
+    w1_transpose = w1.transpose()  
+    a_all_data = np.dot (train_data_with_bias, w1_transpose)
+    z_all_data = sigmoid (a_all_data)
     
-    #Dheeraj: Feedforward Propogation starts here
-    # adding bias node to the training data
-    #training_data = np.append([1], training_data)
-    train_data = np.array([])
-    train_data_list = []
-
-    for x in xrange (0, len(training_data)):
-        train_data_list.append(np.append ([1], training_data[x]))
-    train_data = np.vstack(train_data_list)
-
-    aj_vector = np.array([])
-    aj_list = []
-    for j in xrange (0, n_hidden):
-        aj = 0
-        for i in xrange (0, n_input):
-            aj = aj + w1[j][i]*train_data[i]
-        aj_list.append (aj)
-    aj_vector = np.vstack(aj_list)
-
-    zj = sigmoid (aj_vector)
+    z_all_data_rows, z_all_data_columns = z_all_data.shape
     
-    bl_vector = np.array([])
-    bl_list = []
-    for j in xrange (0, n_class):
-        bl = 0
-        for i in xrange (0, n_hidden):
-            bl = bl + w1[j][i]*zj[i]
-        bl_list.append (bl)
-    bl_vector = np.vstack(bl_list)
-
-    sigmal = sigmoid (bl_vector)
+    zj_all_data_with_bias = np.array([])
+    zj_all_data_with_bias_list = []    
+    for x in xrange (0, z_all_data_rows):
+        zj_all_data_with_bias_list.append(np.append ([1], z_all_data[x]))
+    zj_all_data_with_bias = np.vstack(zj_all_data_with_bias_list)
     
-    #Dheeraj: Feedforward Propogation ends here
+    w2_transpose = w2.transpose()
+    b_all_data = np.dot (zj_all_data_with_bias,w2_transpose)
+    o_all_data = sigmoid (b_all_data)
+    #Dheeraj: Step-1: Feedforward Propogation ends here
+    
+    #Dheeraj: Step-2: error function starts here
+    # Step-2.1: y_all_data computation
+    y_temp = np.array([])
+    y_Temp_list = []
+    y_all_data = np.array([])
+    y_all_data_list = []   
+    for i in range (0, training_data_rows):
+        y_Temp_list.append ([0, 0 ,0, 0, 0, 0, 0, 0, 0] )
+    y_temp = np.vstack (y_Temp_list)
+    for i in range (0, training_data_rows):
+        target_value = int (training_label[i][0][-1:])
+        y_all_data_list.append(np.insert (y_temp[i], target_value, 1))        
+    y_all_data = np.vstack (y_all_data_list)
+    # Step-2.1: y_all_data computation ends
+    
+    #Step-2.2: (1-y_all_data) and (1-o_all_data) computation starts here
+    one_minus_y_all_data = 1 - y_all_data
+    one_minus_o_all_data = 1 - o_all_data
+    #Step-2.2: (1-y_all_data) and (1-o_all_data) computationends here
+    
+    #Step-2.3: ln (o_all_data) and ln (1- o_all_data) computation starts
+    ln_o_all_data = np.log (o_all_data)
+    ln_one_minus_o_all_data = np.log (one_minus_o_all_data)
+    #Step-2.3: ln (o_all_data) and ln (1- o_all_data) computation ends
+    
+    #Step-2.4 computing j_all_data starts here
+    """ln_o_all_data_transpose = ln_o_all_data.transpose()
+    ln_one_minus_o_all_data_transpose = ln_one_minus_o_all_data.transpose()
+    temp_1 = np.dot (y_all_data, ln_o_all_data_transpose)
+    temp_2 = np.dot (one_minus_y_all_data, ln_one_minus_o_all_data_transpose)
+    j_all_data = np.add (temp_1, temp_2)"""
+    
+    j_all_data = np.array([])
+    j_all_data_list = []
+    for x in xrange (0, training_data_rows):
+        j_all_data_list.append (np.add (np.dot (y_all_data[x], (ln_o_all_data[x]).transpose()), np.dot (one_minus_y_all_data[x], (ln_one_minus_o_all_data[x]).transpose())))
+    j_all_data = np.vstack (j_all_data_list)
+    
+    #Step-2.4 computing j_all_data ends here
+    
+
+    #Dheeraj: Step-2: error function ends here
+
     
     #Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     #you would use code similar to the one below to create a flat array
     #obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
+    
     obj_grad = np.array([])
     
     return (obj_val,obj_grad)
