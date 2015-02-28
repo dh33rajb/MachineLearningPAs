@@ -109,6 +109,17 @@ def preprocess():
     test_data = np.vstack(testDataList)
     test_label = np.vstack(testLabelList)
     
+    #Type Conversion
+    
+    train_data = train_data.astype(float)
+    validation_data = validation_data.astype(float)
+    test_data = test_data.astype(float)
+    
+    #Normalization
+    train_data = train_data/255
+    validation_data = validation_data/255
+    test_data = test_data/255
+    
     #dheeraj changes-2 start
     """print len (train_label), len (train_label.T)
     print len(train_data), len (train_data.T)
