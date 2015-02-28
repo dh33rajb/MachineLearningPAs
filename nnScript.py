@@ -297,6 +297,9 @@ def nnPredict(w1,w2,data):
     return labels
 
 def selectfeatures(input_data):
+    """A function which deletes columns that have all elements with same values
+    Input: A numpy array
+    Output: A numpy array without columns that have all elements with same values"""
 
     sub_input_data = np.subtract(input_data, input_data[0])
     index_array = np.nonzero(sub_input_data)
