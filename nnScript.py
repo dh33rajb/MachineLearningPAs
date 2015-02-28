@@ -295,6 +295,23 @@ def nnPredict(w1,w2,data):
     #Your code here
     
     return labels
+
+def selectfeatures(input_data):
+
+    sub_input_data = np.subtract(input_data, input_data[0])
+    index_array = np.nonzero(sub_input_data)
+    index_array = np.unique(index_array[1])
+    
+    zero_index_array = []
+    for index in range(0,783):
+        if index in index_array:
+            pass
+        else:
+            zero_index_array.append(index)
+
+
+    output_data = np.delete(input_data,zero_index_array,axis=1)
+    return output_data
     
 
 
