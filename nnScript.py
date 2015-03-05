@@ -393,7 +393,8 @@ def regularization(w1,w2,lambdaval,objval,num_of_training_data_rows,grad_w1,grad
     
     sum_weights = np.add(sum_sq_weight_matrix_one,sum_sq_weight_matrix_two)
     
-    regularized_answer = np.sum(objval, np.multiply(lambdaval/2*num_of_training_data_rows, sum_weights))
+    #regularized_answer = np.sum(objval, np.multiply(lambdaval/2*num_of_training_data_rows, sum_weights))
+    regularized_answer = objval + ((lambdaval/(2*num_of_training_data_rows))*sum_weights)
 
     grad_w2_new = np.add(grad_w2,(np.multiply(lambdaval,w2) / num_of_training_data_rows)) 
     grad_w1_new = np.add(grad_w1,(np.multiply(lambdaval,w1)/ num_of_training_data_rows)) 
