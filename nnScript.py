@@ -497,5 +497,6 @@ pickle.dump(n_hidden,f)
 pickle.dump(w1,f)
 pickle.dump(w2,f)
 pickle.dump(lambdaval,f)
+f.close()
 
 logging.info('Total time taken:' + str(time.time()-start_time))
