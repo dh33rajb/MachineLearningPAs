@@ -4,6 +4,7 @@ from scipy.io import loadmat
 from math import sqrt
 import time
 import logging
+import pickle
 
 def initializeWeights(n_in,n_out):
     """
@@ -427,7 +428,7 @@ train_data, train_label, validation_data,validation_label, test_data, test_label
 n_input = train_data.shape[1]; 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 50;
+n_hidden = 4;
                    
 # set the number of nodes in output unit
 n_class = 10;                  
@@ -441,7 +442,7 @@ logging.debug('Weights have been initialized');
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
 # set the regularization hyper-parameter
-lambdaval = 1;
+lambdaval = 0.2;
 
 
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
@@ -490,5 +491,11 @@ print "test label shape: ", test_label.shape
 #find the accuracy on Validation Dataset
 
 print('\n Test set Accuracy:' + str(100*np.mean((predicted_label == test_label).astype(float))) + '%')
+
+f = open('params.pickle','wb')
+pickle.dump(n_hidden,f)
+pickle.dump(w1,f)
+pickle.dump(w2,f)
+pickle.dump(lambdaval,f)
 
 logging.info('Total time taken:' + str(time.time()-start_time))
