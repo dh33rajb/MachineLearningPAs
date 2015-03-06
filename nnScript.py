@@ -428,7 +428,7 @@ train_data, train_label, validation_data,validation_label, test_data, test_label
 n_input = train_data.shape[1]; 
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 4;
+n_hidden = 90;
                    
 # set the number of nodes in output unit
 n_class = 10;                  
@@ -442,7 +442,7 @@ logging.debug('Weights have been initialized');
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 
 # set the regularization hyper-parameter
-lambdaval = 0.2;
+lambdaval = 1;
 
 
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
