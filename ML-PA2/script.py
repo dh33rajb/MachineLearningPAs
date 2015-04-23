@@ -3,9 +3,11 @@ University at Buffalo - Spring 2015
 CSE 574 - Introduction to Machine Learning
 Programming Assignment 2
 
-Authors: Dheeraj Balakavi, Pravin Umamaheswaran, Mithun
+Authors: Dheeraj Balakavi, Pravin Umamaheswaran, Mithun Nagesh
 
+It's not who you are, it's what you do that defines you - Batman / Bruce Wayne
 '''
+from __future__ import division
 import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
@@ -214,13 +216,13 @@ def learnRidgeRegression(X,y,lambd):
     XT = X.transpose()
     XT_into_X = np.dot (XT, X)
     identity = np.identity (M)
-    lambd_into_I = (lambd * N )* identity
+    lambd_into_NI = (lambd * N )* identity
     
-    sum_lambI_XTX = lambd_into_I + XT_into_X
-    sum_lambI_XTX_inv = np.linalg.inv(sum_lambI_XTX)
+    sum_lambNI_XTX = lambd_into_NI + XT_into_X
+    sum_lambNI_XTX_inv = np.linalg.inv(sum_lambNI_XTX)
     
     # Step-2: Compute w
-    product_one = np.dot (sum_lambI_XTX_inv, XT)
+    product_one = np.dot (sum_lambNI_XTX_inv, XT)
     w = np.dot (product_one, y)
                                                 
     return w
@@ -255,32 +257,32 @@ def testOLERegression(w,Xtest,ytest):
     # to w (vector) for the given data X and y and the regularization parameter
     # lambda 
 def regressionObjVal(w, X, y, lambd):
-    
     # Step-1: Error computation --> scalar
     X_rows, X_columns = X.shape
     N = X_rows
     w = np.vstack (w)
-    
+    #w = np.reshape(w, (w.shape[0], 1))    
     Xw = np.dot (X, w)
     y_minus_Xw = y - Xw
     y_minus_Xw_transpose = y_minus_Xw.transpose()
      
-    prod1 = (np.dot (y_minus_Xw_transpose, y_minus_Xw) / (2 * N) )    
+    prod1 = (np.dot (y_minus_Xw_transpose, y_minus_Xw)) / (2 * N)   
     prod2 = (1/2) * lambd * np.dot (w.transpose(), w)    
     error = (prod1 + prod2).item(0)
-    
+    #print error
     # Step-2: Error grad computation --> vector
     XT_X = np.dot (X.transpose(), X)
     wT_XT_X = np.dot (w.transpose(), XT_X)  
     yT_X = np.dot (y.transpose(), X)
+    yT_X = -1 * yT_X
     
-    sum1 = (wT_XT_X - yT_X) / N
-    sum2 = np.dot (w.transpose(), lambd)
+    sum1 = (yT_X + wT_XT_X) / N
+    sum2 = lambd * w.transpose()
     error_grad = sum1 + sum2
+    error_grad = np.squeeze(np.asarray(error_grad))
+    #print error_grad                         
     
-    error_grad = np.squeeze(np.asarray(error_grad))                            
     return error, error_grad
-
 
 def mapNonLinear(x,p):
     # Inputs:                                                                  
@@ -324,6 +326,7 @@ qdaacc = qdaTest(means,covmats,Xtest,ytest)
 print('QDA Accuracy = '+str(qdaacc))
 
 # Problem 2
+
 X,y,Xtest,ytest = pickle.load(open('diabetes.pickle','rb'))   
 # add intercept
 X_i = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
@@ -338,9 +341,8 @@ mle_i = testOLERegression(w_i,Xtest_i,ytest)
 print('RMSE without intercept '+str(mle))
 print('RMSE with intercept '+str(mle_i))
 
-
 # Problem 3
-k = 21
+k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses3 = np.zeros((k,1))
@@ -348,10 +350,10 @@ for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
     i = i + 1
-plt.plot(lambdas,rmses3)
+#plt.plot(lambdas,rmses3)
 
 # Problem 4
-k = 21
+k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses4 = np.zeros((k,1))
@@ -365,10 +367,19 @@ for lambd in lambdas:
         w_l_1[j] = w_l.x[j]
     rmses4[i] = testOLERegression(w_l_1,Xtest_i,ytest)
     i = i + 1
-plt.plot(lambdas,rmses4)
+#plt.plot(lambdas,rmses4)
+
+fig, ax = plt.subplots()
+fig.suptitle('Using Gradient Descent for Ridge Regression Learning', fontsize=14, fontweight='bold')
+ax.set_title('Lambda vs RMSE4 for Training data')
+ax.plot(lambdas,rmses4)
+ax.set_xlabel('Lambda')
+ax.set_ylabel('RMSE4')
+ax.legend(loc='upper right')
+
+
 
 # Problem 5
- 
 pmax = 7
 lambda_opt = lambdas[np.argmin(rmses4)]
 rmses5 = np.zeros((pmax,2))
@@ -381,4 +392,3 @@ for p in range(pmax):
     rmses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
 plt.plot(range(pmax),rmses5)
 plt.legend(('No Regularization','Regularization'))
- 
